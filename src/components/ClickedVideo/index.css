@@ -1,0 +1,99 @@
+.youtube-div1 {
+  background-color: #f8fafc;
+  /* height: 100vh; */
+  width: 80vw;
+  padding: 20px;
+}
+.view-count {
+  font-size: 16px;
+  font-family: 'Roboto';
+  color: #475569;
+  margin-right: 13px;
+}
+.flex {
+  display: flex;
+  flex-direction: row;
+  /* justify-content: center; */
+  align-items: center;
+}
+.li {
+  list-style-type: disc;
+}
+.published {
+  font-size: 16px;
+  font-family: 'Roboto';
+  color: #475569;
+}
+.like-main-div {
+  display: flex;
+  flex-direction: row;
+  /* justify-content: center; */
+  align-items: center;
+}
+.like-button-div {
+  display: flex;
+  flex-direction: row;
+  /* justify-content: center; */
+  align-items: center;
+  background-color: transparent;
+  border-width: 0px;
+}
+.save-button-div {
+  display: flex;
+  flex-direction: row;
+  /* justify-content: center; */
+  align-items: center;
+  background-color: transparent;
+  border-width: 0px;
+}
+.icon-like {
+  font-size: 20px;
+}
+.like {
+  font-size: 14px;
+  margin-right: 20px;
+}
+.like-button-clicked {
+  color: #3b82f6;
+}
+.unlike {
+  color: #475569;
+}
+.options-like {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.profile-title {
+  font-size: 16px;
+  font-family: 'Roboto';
+  color: #212121;
+}
+.profile-image {
+  height: 40px;
+  margin-top: 16px;
+  margin-right: 6px;
+}
+.subscriber-count {
+  font-size: 13px;
+  font-family: 'Roboto';
+  color: #475569;
+}
+.channel-name {
+  font-size: 14px;
+  font-family: 'Roboto';
+  color: #212121;
+}
+.channel-div {
+  display: flex;
+  flex-direction: row;
+  /* justify-content: center; */
+  /* align-items: center; */
+}
+.description {
+  font-size: 14px;
+  font-family: 'Roboto';
+  color: #616e7c;
+  margin-right: 160px;
+}

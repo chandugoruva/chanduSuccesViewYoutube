@@ -1,0 +1,20 @@
+.nav-flex {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.icon1 {
+  font-size: 30px;
+  color: #000000;
+  margin-right: 20px;
+}
+.nav-items {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.clicked-item {
+  color: red;
+}

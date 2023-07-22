@@ -1,0 +1,49 @@
+.youtube-item-div {
+  max-width: 360px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+.thumbnail-image {
+  height: 160px;
+}
+.profile {
+  height: 30px;
+  margin-right: 10px;
+  margin-top: 16px;
+}
+.title {
+  font-size: 13px;
+  font-family: 'Roboto';
+  margin-right: 60px;
+}
+.profile-div {
+  display: flex;
+  flex-direction: row;
+  /* justify-content: center; */
+  /* align-items: center; */
+}
+.channel-name {
+  font-size: 13px;
+  font-family: 'Roboto';
+  color: #475569;
+}
+.view-count1 {
+  font-size: 13px;
+  font-family: 'Roboto';
+  color: #475569;
+  margin-right: 20px;
+}
+.flex {
+  display: flex;
+  flex-direction: row;
+  /* justify-content: center; */
+  align-items: center;
+}
+.li {
+  list-style-type: disc;
+}
+.published {
+  font-size: 13px;
+  font-family: 'Roboto';
+  color: #475569;
+}
