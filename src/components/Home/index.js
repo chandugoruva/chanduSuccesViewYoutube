@@ -1,241 +1,184 @@
-import {Link} from 'react-router-dom'
-import {useState, useEffect} from 'react'
-import {MdHome, MdClose, MdSearch} from 'react-icons/md'
-import {AiTwotoneFire} from 'react-icons/ai'
-import {SiYoutubegaming} from 'react-icons/si'
-import {RiMenuAddFill} from 'react-icons/ri'
+import {Component} from 'react'
 import Cookies from 'js-cookie'
-import YoutubeItem from '../YoutubeItem'
+import Loader from 'react-loader-spinner'
+
+import {AiOutlineClose, AiOutlineSearch} from 'react-icons/ai'
+
+import Header from '../Header'
+import NavigationBar from '../NavigationBar'
+import ThemeAndVideoContext from '../Context/ThemeAndVideoContext'
+import HomeVideos from '../HomeVideos'
+import FailureView from '../Failureview'
 
 import {
-  HomeDiv,
-  OptionsDiv,
-  Paragraph,
-  ContactHeading,
-  ImageLogo,
-  ContactParagraph,
-  PremiumDiv,
+  HomeContainer,
+  BannerContainer,
   BannerImage,
-  BannerHeading,
+  BannerText,
   BannerButton,
+  BannerLeftPart,
+  BannerRightPart,
   BannerCloseButton,
-  InputSearch,
-  SearchButton,
-} from './styledComponent'
-import Header from '../Header'
-import './index.css'
+  SearchContainer,
+  SearchInput,
+  SearchIconContainer,
+  LoaderContainer,
+} from './styledComponents'
 
-const apiYoutube = {
+const apiStatusConstants = {
   initial: 'INITIAL',
-  loading: 'LOADING',
-  failure: 'FAILURE',
   success: 'SUCCESS',
+  failure: 'FAILURE',
+  inProgress: 'IN_PROGRESS',
 }
-const Home = () => {
-  const [isBanner, setBanner] = useState(true)
-  const [youtubeData, setYoutubeData] = useState()
-  const [youtubeStatus, setYoutubeStatus] = useState(apiYoutube.initial)
-  const [colors, setColors] = useState({
-    home: false,
-    trending: false,
-    gaming: false,
-    savedVideos: false,
-  })
-  const [trending, setYoutubeTrendingData] = useState()
 
-  const [urls, setUrl] = useState('https://apis.ccbp.in/videos/all?search=')
-  const getYoutubeData = async () => {
-    setYoutubeStatus(apiYoutube.loading)
+class Home extends Component {
+  state = {
+    homeVideos: [],
+    searchInput: '',
+    apiStatus: apiStatusConstants.initial,
+    bannerDisplay: 'flex',
+  }
+
+  componentDidMount() {
+    this.getVideos()
+  }
+
+  getVideos = async () => {
+    const {searchInput} = this.state
+    this.setState({apiStatus: apiStatusConstants.inProgress})
     const jwtToken = Cookies.get('jwt_token')
-    const url = 'https://apis.ccbp.in/videos/all?search='
+    const url = `https://apis.ccbp.in/videos/all?search=${searchInput}`
     const options = {
-      method: 'GET',
       headers: {
         Authorization: `Bearer ${jwtToken}`,
       },
+      method: 'GET',
     }
     const response = await fetch(url, options)
-    if (response.ok === true) {
+    if (response.ok) {
       const data = await response.json()
-      console.log(data)
-      const formattedData = data.videos.map(each => ({
-        channel: {
-          name: each.channel.name,
-          profileImageUrl: each.channel.profile_image_url,
-        },
-        id: each.id,
-        publishedAt: each.published_at,
-        thumbnailUrl: each.thumbnail_url,
-        title: each.title,
-        viewCount: each.view_count,
+      const updatedData = data.videos.map(eachVideo => ({
+        id: eachVideo.id,
+        title: eachVideo.title,
+        thumbnailUrl: eachVideo.thumbnail_url,
+        viewCount: eachVideo.view_count,
+        publishedAt: eachVideo.published_at,
+        name: eachVideo.channel.name,
+        profileImageUrl: eachVideo.channel.profile_image_url,
       }))
-      console.log(formattedData)
-      setYoutubeData(formattedData)
-      setYoutubeStatus(apiYoutube.success)
+      this.setState({
+        homeVideos: updatedData,
+        apiStatus: apiStatusConstants.success,
+      })
     } else {
-      setYoutubeStatus(apiYoutube.failure)
+      this.setState({apiStatus: apiStatusConstants.failure})
     }
   }
 
-  const changeHome = () => {
-    setColors(prevState => ({
-      ...prevState,
-      home: true,
-      trending: false,
-      gaming: false,
-      savedVideos: false,
-    }))
+  onCloseBanner = () => {
+    this.setState({bannerDisplay: 'none'})
   }
 
-  const changeTrending = () => {
-    setColors(prevState => ({
-      ...prevState,
-      trending: true,
-      home: false,
-      gaming: false,
-      savedVideos: false,
-    }))
+  onChangeInput = event => {
+    this.setState({searchInput: event.target.value})
   }
 
-  const changeGaming = () => {
-    setColors(prevState => ({
-      ...prevState,
-      gaming: true,
-      home: false,
-      trending: false,
-      savedVideos: false,
-    }))
+  getSearchResults = () => {
+    this.getVideos()
   }
 
-  const changeSaved = () => {
-    setColors(prevState => ({
-      ...prevState,
-      gaming: false,
-      home: false,
-      trending: false,
-      savedVideos: true,
-    }))
+  onRetry = () => {
+    this.setState({searchInput: ''}, this.getVideos)
   }
-  useEffect(() => {
-    getYoutubeData()
-  }, [])
-  useEffect(() => {
-    changeHome()
-  }, [])
-  const getSuccessYoutubeData = () => (
-    <ul className="ul">
-      {youtubeData.map(each => (
-        <YoutubeItem each={each} key={each.id} />
-      ))}
-    </ul>
+
+  renderLoadingView = () => (
+    <LoaderContainer data-testid="loader">
+      <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
+    </LoaderContainer>
   )
-  const renderYoutube = () => {
-    switch (youtubeStatus) {
-      case apiYoutube.success:
-        return getSuccessYoutubeData()
+
+  renderVideosView = () => {
+    const {homeVideos} = this.state
+    return <HomeVideos homeVideos={homeVideos} onRetry={this.onRetry} />
+  }
+
+  renderFailureView = () => <FailureView onRetry={this.onRetry} />
+
+  renderHomeVideos = () => {
+    const {apiStatus} = this.state
+
+    switch (apiStatus) {
+      case apiStatusConstants.success:
+        return this.renderVideosView()
+      case apiStatusConstants.failure:
+        return this.renderFailureView()
+      case apiStatusConstants.inProgress:
+        return this.renderLoadingView()
       default:
         return null
     }
   }
-  const changeBanner = () => {
-    setBanner(false)
+
+  render() {
+    const {searchInput, bannerDisplay} = this.state
+    return (
+      <ThemeAndVideoContext.Consumer>
+        {value => {
+          const {isDarkTheme} = value
+
+          const bgColor = isDarkTheme ? '#181818' : '#f9f9f9'
+          const textColor = isDarkTheme ? '#f9f9f9' : '#231f20'
+          const display = bannerDisplay === 'flex' ? 'flex' : 'none'
+
+          return (
+            <>
+              <Header />
+              <NavigationBar />
+              <HomeContainer data-testid="home" bgColor={bgColor}>
+                <BannerContainer data-testid="banner" display={display}>
+                  <BannerLeftPart>
+                    <BannerImage
+                      src="https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png"
+                      alt="nxt watch logo"
+                    />
+                    <BannerText>
+                      Buy Nxt Watch Premium plans with <br /> UPI
+                    </BannerText>
+                    <BannerButton type="button">GET IT NOW</BannerButton>
+                  </BannerLeftPart>
+                  <BannerRightPart>
+                    <BannerCloseButton
+                      data-testid="close"
+                      onClick={this.onCloseBanner}
+                    >
+                      <AiOutlineClose size={25} />
+                    </BannerCloseButton>
+                  </BannerRightPart>
+                </BannerContainer>
+                <SearchContainer>
+                  <SearchInput
+                    type="search"
+                    placeholder="Search"
+                    value={searchInput}
+                    onChange={this.onChangeInput}
+                    color={textColor}
+                  />
+                  <SearchIconContainer
+                    data-testid="searchButton"
+                    onClick={this.getSearchResults}
+                  >
+                    <AiOutlineSearch size={20} />
+                  </SearchIconContainer>
+                </SearchContainer>
+                {this.renderHomeVideos()}
+              </HomeContainer>
+            </>
+          )
+        }}
+      </ThemeAndVideoContext.Consumer>
+    )
   }
-  const bannerSection = () => (
-    <PremiumDiv>
-      <div className="banner-flex">
-        <BannerImage
-          src="https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png"
-          alt="watch logo"
-        />
-        <BannerCloseButton onClick={changeBanner}>
-          <MdClose className="icon3" />
-        </BannerCloseButton>
-      </div>
-      <BannerHeading>
-        Buy Nxt Watch Premium prepaid plans With UPI
-      </BannerHeading>
-      <BannerButton>GET IT NOW</BannerButton>
-    </PremiumDiv>
-  )
-
-  return (
-    <Link to="/" className="link">
-      <Header />
-      <HomeDiv>
-        <div className="options-div6">
-          <OptionsDiv onClick={changeHome}>
-            {colors.home ? (
-              <MdHome className="icon2 clicked-item" />
-            ) : (
-              <MdHome className="icon2" />
-            )}
-
-            <Paragraph className="clicked-option">Home</Paragraph>
-          </OptionsDiv>
-          <Link to="/trending-videos" className="link">
-            <OptionsDiv onClick={changeTrending}>
-              {colors.trending ? (
-                <AiTwotoneFire className="icon2 clicked-item" />
-              ) : (
-                <AiTwotoneFire className="icon2" />
-              )}
-
-              <Paragraph>Trending</Paragraph>
-            </OptionsDiv>
-          </Link>
-          <Link to="/gaming-videos" className="link">
-            <OptionsDiv onClick={changeGaming}>
-              {colors.gaming ? (
-                <SiYoutubegaming className="icon2 clicked-item" />
-              ) : (
-                <SiYoutubegaming className="icon2" />
-              )}
-
-              <Paragraph>Gaming</Paragraph>
-            </OptionsDiv>
-          </Link>
-          <Link to="/saved-videos" className="link">
-            <OptionsDiv onClick={changeSaved}>
-              {colors.savedVideos ? (
-                <RiMenuAddFill className="icon2 clicked-item" />
-              ) : (
-                <RiMenuAddFill className="icon2" />
-              )}
-
-              <Paragraph>Saved videos</Paragraph>
-            </OptionsDiv>
-          </Link>
-          <div>
-            <ContactHeading>CONTACT US</ContactHeading>
-            <ImageLogo
-              src="https://assets.ccbp.in/frontend/react-js/nxt-watch-facebook-logo-img.png"
-              alt="facebook logo"
-            />
-            <ImageLogo
-              src="https://assets.ccbp.in/frontend/react-js/nxt-watch-twitter-logo-img.png"
-              alt="twitter logo"
-            />
-            <ImageLogo
-              src="https://assets.ccbp.in/frontend/react-js/nxt-watch-linked-in-logo-img.png"
-              alt="linked in logo"
-            />
-            <ContactParagraph>
-              Enjoy! Now to see your channels and recommendations!
-            </ContactParagraph>
-          </div>
-        </div>
-        <div className="ggynIp">
-          {isBanner && bannerSection()}
-          <div className="youtube-div6">
-            <InputSearch placeholder="Search" />
-            <SearchButton>
-              <MdSearch className="icon4" />
-            </SearchButton>
-            {renderYoutube()}
-          </div>
-        </div>
-      </HomeDiv>
-    </Link>
-  )
 }
+
 export default Home
